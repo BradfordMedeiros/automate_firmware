@@ -1,11 +1,13 @@
 
-
 extern crate getopts;
 
 use getopts::Options;
 use std::env;
 use std::path::Path;
 use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+
 use std::process::Command;
 
 fn print_usage(program: &str, opts: Options){
@@ -20,7 +22,20 @@ fn execute_script(path: &str){
 
 // returns true if user has permission (hashes match)
 fn has_permission(user_hash_path:String, system_hash_path: String) -> bool {
-   false
+   println!("user_hash is: {} ", user_hash_path);
+   let mut file_user = File::open(user_hash_path).unwrap();
+   let mut contents_user = String::new();
+   file_user.read_to_string(&mut contents_user);
+
+   let mut file_system = File::open(system_hash_path).unwrap();
+   let mut contents_system = String::new();
+   file_system.read_to_string(&mut contents_system);
+
+   println!("contents is: {} ", contents_system);
+   println!("contents is: {} ", contents_user);
+
+
+   contents_user == contents_system
 }
 
 fn get_scripts_to_execute(directory_path: String) -> Vec<String> {
@@ -62,7 +77,7 @@ fn main() {
    }
 
    let key = matches.opt_str("k").unwrap();
-   let sys = matches.opt_str("s").unwrap();
+   let sys = matches.opt_str("m").unwrap();
 
    let should_execute = has_permission(key, sys);
 
