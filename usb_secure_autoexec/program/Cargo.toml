@@ -1,0 +1,6 @@
+[package]
+name = "usb_secure_autoexec"
+version = "0.1.0"
+authors = ["BradfordMedeiros <bradmedeiros0@gmail.com>"]
+
+[dependencies]
