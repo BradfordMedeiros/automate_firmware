@@ -1,4 +1,3 @@
-
 extern crate getopts;
 
 use getopts::Options;
@@ -7,17 +6,11 @@ use std::path::Path;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
-
 use std::process::Command;
 
 fn print_usage(program: &str, opts: Options){
    let description = format!("Usage: {} FILE [options]", program);
    println!("{}", opts.usage(&description));
-}
-
-
-fn execute_script(path: &str){
-   Command::new("sh").arg("-c").arg(path).output().expect("failed to execute script");
 }
 
 // returns true if user has permission (hashes match)
@@ -53,6 +46,10 @@ fn get_scripts_to_execute(directory_path: String) -> Vec<String> {
    }
 
    scripts
+}
+
+fn execute_script(path: &str){
+   Command::new("sh").arg("-c").arg(path).output().expect("failed to execute script");
 }
 
 // Program
@@ -92,5 +89,4 @@ fn main() {
    }else{
       panic!("invalid keys");
    }
-
 }
