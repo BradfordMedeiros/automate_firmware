@@ -1,34 +1,36 @@
 extern crate getopts;
 
-use getopts::Options;
-use std::env;
-use std::path::Path;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
+use std::ffi::OsStr;
+use std::path::Path;
+use getopts::Options;
 
 fn print_usage(program: &str, opts: Options){
    let description = format!("Usage: {} FILE [options]", program);
    println!("{}", opts.usage(&description));
 }
 
-// returns true if user has permission (hashes match)
 fn has_permission(user_hash_path:String, system_hash_path: String) -> bool {
-   println!("user_hash is: {} ", user_hash_path);
    let mut file_user = File::open(user_hash_path).unwrap();
    let mut contents_user = String::new();
-   file_user.read_to_string(&mut contents_user);
+   let _ = file_user.read_to_string(&mut contents_user);
 
    let mut file_system = File::open(system_hash_path).unwrap();
    let mut contents_system = String::new();
-   file_system.read_to_string(&mut contents_system);
-
-   println!("contents is: {} ", contents_system);
-   println!("contents is: {} ", contents_user);
-
+   let _ = file_system.read_to_string(&mut contents_system);
 
    contents_user == contents_system
+}
+
+fn is_script(file_path: &String) -> bool {
+   Path::new(file_path).extension()  == Some(OsStr::new("sh"))
+}
+
+fn execute_script(path: &str){
+   Command::new("sh").arg("-c").arg(path).output().expect("failed to execute script");
 }
 
 fn get_scripts_to_execute(directory_path: String) -> Vec<String> {
@@ -39,22 +41,18 @@ fn get_scripts_to_execute(directory_path: String) -> Vec<String> {
    if is_directory {
       let paths = fs::read_dir(&directory_path).unwrap();
       for path in paths {
-        scripts.push(path.unwrap().path().display().to_string())
+         let script  = path.unwrap().path().display().to_string();
+         if is_script(&script){
+            scripts.push(script);
+         }
       }
    }else{
       panic!("{} is not directory", directory_path);
    }
-
    scripts
 }
 
-fn execute_script(path: &str){
-   Command::new("sh").arg("-c").arg(path).output().expect("failed to execute script");
-}
-
-// Program
 fn main() {
-
    let args: Vec<String> = std::env::args().collect();
    let program_name = args[0].clone();
 
@@ -83,7 +81,6 @@ fn main() {
       let scripts = get_scripts_to_execute(script_path.unwrap());
 
       for script in scripts.iter() {
-         println!("script is { }", script);
          execute_script(&script);
       }
    }else{
