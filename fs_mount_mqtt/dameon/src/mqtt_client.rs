@@ -46,4 +46,20 @@ impl MqttClient {
         self.writer.write_packet(&subscribePacket);
         self.writer.flush();
     }
+
+    /*
+
+
+    let packet = reader.read_packet().unwrap();
+    println!("{:?}", packet);
+
+    subscribe_to_topic(&mut writer, "humidity".to_owned());
+
+    let packet = reader.read_packet().unwrap();
+    println!("{:?}", packet);
+
+    loop {
+        let packet = reader.read_packet().unwrap();
+        println!("{:?}", packet);
+    }*/
 }

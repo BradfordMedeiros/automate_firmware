@@ -61,19 +61,6 @@ fn main() {
         println!("a is {}", a);
 
     });
-/*
 
-    let packet = reader.read_packet().unwrap();
-    println!("{:?}", packet);
-
-    subscribe_to_topic(&mut writer, "humidity".to_owned());
-
-    let packet = reader.read_packet().unwrap();
-    println!("{:?}", packet);
-
-    loop {
-        let packet = reader.read_packet().unwrap();
-        println!("{:?}", packet);
-    }*/
 
 }
