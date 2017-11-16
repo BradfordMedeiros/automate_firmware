@@ -2,6 +2,7 @@
 extern crate mqtt3;
 
 use std::env;
+use std::collections::HashMap;
 use std::net::TcpStream;
 use std::io::{Read, Write, BufReader, BufWriter};
 use std::process::exit;
@@ -10,7 +11,7 @@ use std::sync::Arc;
 
 mod mqtt_client;
 
-/*enum MqttMountInfoKind {
+enum MqttMountInfoKind {
     WriteFile,
     CallScript,
 }
@@ -34,7 +35,7 @@ impl MqttMountManager {
     fn remove_mqtt_mount(mut self, topic: String, mount_info: MqttMountInfo){
         self.mqtt_mounts.remove(&topic);
     }
-}*/
+}
 
 
 
@@ -43,8 +44,6 @@ fn main() {
 
     //let thing = MqttMountInfo { topic: String::from("/room1/temp"), mount_type: MqttMountInfoKind::WriteFile };
 
-    //let manager = MqttMountManager::new();
-    //manager.add_mqtt_mount(String::from("some path"), MqttMountInfo{ topic: String::from("wow"), mount_type: MqttMountInfoKind::CallScript });
 
     //let mut opts = ClientOptions::new();
     //opts.set_reconnect(ReconnectMethod::ReconnectAfter(Duration::from_secs(1)));
@@ -52,8 +51,17 @@ fn main() {
     println!("hello world");
 
 
-    let client = mqtt_client::MqttClient::new(String::from("127.0.0.1:1883"));
+    let mut a= 10;
+    let client = mqtt_client::MqttClient::new(String::from("127.0.0.1:1883"),  &mut || {
 
+        let manager = MqttMountManager::new();
+        manager.add_mqtt_mount(String::from("some path"), MqttMountInfo{ topic: String::from("wow"), mount_type: MqttMountInfoKind::CallScript });
+        a = a + 1;
+
+        println!("a is {}", a);
+
+    });
+/*
 
     let packet = reader.read_packet().unwrap();
     println!("{:?}", packet);
@@ -66,6 +74,6 @@ fn main() {
     loop {
         let packet = reader.read_packet().unwrap();
         println!("{:?}", packet);
-    }
+    }*/
 
 }

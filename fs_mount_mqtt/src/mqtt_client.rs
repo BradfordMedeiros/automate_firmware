@@ -15,7 +15,7 @@ pub struct MqttClient {
 }
 
 impl MqttClient {
-    pub fn new(address: String) -> MqttClient {
+    pub fn new(address: String, on_mqtt_topic: &mut FnMut()) -> MqttClient {
         let mut stream = TcpStream::connect(address.as_str()).unwrap();
         let mut writer = BufWriter::new(stream.try_clone().unwrap());
         let mut reader = BufReader::new(stream.try_clone().unwrap());
@@ -31,6 +31,8 @@ impl MqttClient {
         }));
 
         writer.write_packet(&connect_packet);
+        &on_mqtt_topic();
+        &on_mqtt_topic();
         MqttClient {  stream, writer, reader }
     }
     pub fn subscribe_to_topic (&mut self, topic: String)  {
