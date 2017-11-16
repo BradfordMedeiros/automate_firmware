@@ -1,0 +1,13 @@
+[package]
+name = "fs_mount_mqtt"
+version = "0.1.0"
+authors = ["BradfordMedeiros <bradmedeiros0@gmail.com>"]
+
+[dependencies]
+getopts = "0.2"
+mqtt3 = "0.1.4"
+
+
+
+
+
