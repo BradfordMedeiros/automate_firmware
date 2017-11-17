@@ -13,8 +13,28 @@ use std::str;
 use serde_json::{Value, Error};
 
 #[derive(Serialize, Deserialize)]
-struct Command {
+struct SimpleCommand {
     action_type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct AddTopicScriptCommand {
+    action_type: String,
+    topic: String,
+    script_path: String
+}
+
+#[derive(Serialize, Deserialize)]
+struct AddTopicFileCommand {
+    action_type: String,
+    topic: String,
+    file_path: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct DeleteTopicCommand {
+    action_type: String,
+    id: u32,
 }
 
 fn write_stream(command: &str) -> Result<String, std::io::Error>{
@@ -39,31 +59,45 @@ fn print_usage(program: &str, opts: Options){
 }
 
 fn reset(){
-    let resetCommand = Command { action_type: String::from("reset")};
+    let resetCommand = SimpleCommand { action_type: String::from("reset")};
     let response = write_stream(&serde_json::to_string(&resetCommand).unwrap()).unwrap();
     println!("response is {}", response);
-
 }
 
 fn list(){
-    let listCommand = Command { action_type: String::from("list")};
+    let listCommand = SimpleCommand { action_type: String::from("list")};
     let response = write_stream(&serde_json::to_string(&listCommand).unwrap()).unwrap();
     println!("response is {}", response);
 }
 
-fn delete() {
-    println!("delete placeholder");
-}
-
-fn add_topic_with_path() {
+fn add_topic_with_path(topic: String, file_path: String) {
     // maybe write json?
     // { action: 'subscribe', topic, value }
-    let response = write_stream(&"topic:temperature/humidity/temp");
-    println!("add topic with path placeholder");
+    let addTopicWithPath = AddTopicFileCommand {
+        action_type: String::from("add_topic"),
+        topic,
+        file_path,
+    };
+
+    let response = write_stream(&serde_json::to_string(&addTopicWithPath).unwrap()).unwrap();
+    println!("response is {}", response);
 }
 
-fn add_topic_with_script(){
-    println!("add topic with script placeholder");
+fn add_topic_with_script(topic: String, script_path: String){
+    let addTopicWithScript = AddTopicScriptCommand {
+        action_type: String::from("add_topic"),
+        topic,
+        script_path,
+    };
+
+    let response = write_stream(&serde_json::to_string(&addTopicWithScript).unwrap()).unwrap();
+    println!("response is {}", response);
+}
+
+fn delete() {
+    let deleteCommand = DeleteTopicCommand { action_type: String::from("delete"), id: 1 };
+    let response = write_stream(&serde_json::to_string(&deleteCommand).unwrap()).unwrap();
+    println!("response is {}", response);
 }
 
 
@@ -90,12 +124,24 @@ fn main(){
         reset();
     }else if matches.opt_present("l"){
         list();
-    }else if matches.opt_present("t"){
+    }else if matches.opt_present("t") {
+
         let topic = matches.opt_str("t").unwrap();
-        let path = matches.opt_str("p");
-        let script = matches.opt_str("s");
-
-
+        match matches.opt_str("p") {
+            Some(file_path) => {
+                add_topic_with_path(String::from(topic), file_path);
+            },
+            None => {
+                match matches.opt_str("s") {
+                    Some(script_path) => {
+                        add_topic_with_script(String::from(topic),script_path);
+                    },
+                    None => {
+                        print_usage(&program_name, opts);
+                    }
+                }
+            }
+        }
     }else if matches.opt_present("d"){
         delete();
     }else{
