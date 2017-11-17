@@ -1,17 +1,36 @@
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
+extern crate serde_json;
 extern crate getopts;
 
 use std::io::prelude::*;
 use std::net::TcpStream;
 use std::result;
 use getopts::Options;
+use std::str;
+use serde_json::{Value, Error};
 
-fn write_stream(command: &str) -> Result<usize, std::io::Error>{
+#[derive(Serialize, Deserialize)]
+struct Command {
+    action_type: String,
+}
+
+fn write_stream(command: &str) -> Result<String, std::io::Error>{
     let mut stream = TcpStream::connect("127.0.0.1:8080").unwrap();
 
     let to_write = command.as_bytes();
     let _ = stream.write(&to_write); // ignore the Result
-    let response = stream.read(&mut [0; 128]); // ignore this too*/}
-    return response;
+
+    let mut read = [0; 1028];
+    match stream.read(&mut read) {
+        Ok(n) => {
+            let data = &read[0..n];
+            Ok(String::from(str::from_utf8(&data).unwrap()))
+        }
+        Err(err) => Err(err),
+    }
 }
 
 fn print_usage(program: &str, opts: Options){
@@ -20,19 +39,16 @@ fn print_usage(program: &str, opts: Options){
 }
 
 fn reset(){
-    let response = write_stream(&"reset");
-    match response {
-        Ok(response) => {
-            println!("response { }", response);
-        }
-        Err(_) => {
-            println!("fuck");
-        }
-    }
+    let resetCommand = Command { action_type: String::from("reset")};
+    let response = write_stream(&serde_json::to_string(&resetCommand).unwrap()).unwrap();
+    println!("response is {}", response);
+
 }
 
 fn list(){
-    println!("list placeholder");
+    let listCommand = Command { action_type: String::from("list")};
+    let response = write_stream(&serde_json::to_string(&listCommand).unwrap()).unwrap();
+    println!("response is {}", response);
 }
 
 fn delete() {
@@ -40,6 +56,9 @@ fn delete() {
 }
 
 fn add_topic_with_path() {
+    // maybe write json?
+    // { action: 'subscribe', topic, value }
+    let response = write_stream(&"topic:temperature/humidity/temp");
     println!("add topic with path placeholder");
 }
 

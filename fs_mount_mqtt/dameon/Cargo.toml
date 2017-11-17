@@ -6,6 +6,7 @@ authors = ["BradfordMedeiros <bradmedeiros0@gmail.com>"]
 [dependencies]
 getopts = "0.2"
 mqtt3 = "0.1.4"
+serde_json = "1.0.6"
 
 
 

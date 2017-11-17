@@ -38,9 +38,11 @@ fn handle_client(mut stream: TcpStream) {
                 }
                 let data = &read[0..n];
                 println!("data is:  {:?}", data);
-                let string = str::from_utf8(&data).unwrap();
+                let mut string = String::from(str::from_utf8(&data).unwrap());
+                string.push_str("::from_server");
+
                 println!("as string: {}", string);
-                stream.write(data).unwrap();
+                stream.write(string.as_bytes()).unwrap();
             }
             Err(err) => {
                 panic!(err);
