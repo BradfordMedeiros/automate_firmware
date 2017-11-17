@@ -13,7 +13,6 @@ pub struct MqttClient {
     reader: BufReader<TcpStream>,
 
 }
-
 impl MqttClient {
     pub fn new(address: String, on_mqtt_topic: &mut FnMut()) -> MqttClient {
         let mut stream = TcpStream::connect(address.as_str()).unwrap();
