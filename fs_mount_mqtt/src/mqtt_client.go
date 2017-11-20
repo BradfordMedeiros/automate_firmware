@@ -7,8 +7,16 @@ import (
 	"time"
 )
 
-func hello() {
-	fmt.Println("hello println test")
+type mqtt_message struct {
+	topic string
+	message string
+}
+
+func createClientOptions(clientId string) *mqtt.ClientOptions {
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(fmt.Sprintf("tcp://%s", "127.0.0.1:1883"))
+	opts.SetClientID("fs_mount_mqtt")
+	return opts
 }
 
 func connect(clientId string) mqtt.Client {
@@ -24,25 +32,13 @@ func connect(clientId string) mqtt.Client {
 	return client
 }
 
-func createClientOptions(clientId string) *mqtt.ClientOptions {
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s", "127.0.0.1:1883"))
-	//opts.SetUsername(uri.User.Username())
-	//password, _ := uri.User.Password()
-	//opts.SetPassword(password)
-	opts.SetClientID("someclietnid")
-	return opts
-}
-
-func listen(topic string) {
+func listen(topic string, mqtt_messages  chan <- mqtt_message) {
 	client := connect("sub")
 	client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		fmt.Printf("* [%s] %s\n", msg.Topic(), string(msg.Payload()))
-		on_message(msg.Topic(), string(msg.Payload()))
+		//on_message(msg.Topic(), string(msg.Payload()))
+		mqtt_messages <- mqtt_message{ topic: msg.Topic(), message: string(msg.Payload())}
+		//mqtt_messages <- msg.Topic()
 	})
 }
 
-func on_message(topic string, message string) {
-	fmt.Printf("topic: %s", topic)
-	fmt.Printf("message: %s", message)
-}
+

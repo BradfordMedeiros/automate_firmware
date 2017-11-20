@@ -1,1 +1,2 @@
-package src
+
+package main
