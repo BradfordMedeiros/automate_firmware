@@ -67,37 +67,37 @@ fn reset(){
 fn list(){
     let listCommand = SimpleCommand { action_type: String::from("list")};
     let response = write_stream(&serde_json::to_string(&listCommand).unwrap()).unwrap();
-    println!("response is {}", response);
+    println!("{}", response);
 }
 
 fn add_topic_with_path(topic: String, file_path: String) {
     // maybe write json?
     // { action: 'subscribe', topic, value }
     let addTopicWithPath = AddTopicFileCommand {
-        action_type: String::from("add_topic"),
+        action_type: String::from("add_topic_path"),
         topic,
         file_path,
     };
 
     let response = write_stream(&serde_json::to_string(&addTopicWithPath).unwrap()).unwrap();
-    println!("response is {}", response);
+    println!("{}", response);
 }
 
 fn add_topic_with_script(topic: String, script_path: String){
     let addTopicWithScript = AddTopicScriptCommand {
-        action_type: String::from("add_topic"),
+        action_type: String::from("add_topic_script"),
         topic,
         script_path,
     };
 
     let response = write_stream(&serde_json::to_string(&addTopicWithScript).unwrap()).unwrap();
-    println!("response is {}", response);
+    println!("{}", response);
 }
 
 fn delete() {
     let deleteCommand = DeleteTopicCommand { action_type: String::from("delete"), id: 1 };
     let response = write_stream(&serde_json::to_string(&deleteCommand).unwrap()).unwrap();
-    println!("response is {}", response);
+    println!("{}", response);
 }
 
 
