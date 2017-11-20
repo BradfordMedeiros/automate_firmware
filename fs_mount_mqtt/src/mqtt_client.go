@@ -35,9 +35,7 @@ func connect(clientId string) mqtt.Client {
 func listen(topic string, mqtt_messages  chan <- mqtt_message) {
 	client := connect("sub")
 	client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		//on_message(msg.Topic(), string(msg.Payload()))
 		mqtt_messages <- mqtt_message{ topic: msg.Topic(), message: string(msg.Payload())}
-		//mqtt_messages <- msg.Topic()
 	})
 }
 
