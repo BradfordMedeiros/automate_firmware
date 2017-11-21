@@ -35,6 +35,9 @@ func main() {
 	scriptFlag := param{ is_set: false }
 	flag.Var(&scriptFlag, "script", "script to call when a topic is published")
 
+	deleteFlag := param{ is_set: false }
+	flag.Var(&deleteFlag, "delete", "uuid of subscription to delete")
+
 	resetFlag := flag.Bool("reset", false, "reset all subscriptions")
 	listFlag := flag.Bool("list", false, "list all subscriptions")
 
@@ -44,6 +47,8 @@ func main() {
 		list()
 	}else if *resetFlag {
 		reset()
+	}else if deleteFlag.is_set {
+		delete_subscription(deleteFlag.value)
 	}else if topicFlag.is_set {
 		if scriptFlag.is_set && pathFlag.is_set {
 			print_error()
