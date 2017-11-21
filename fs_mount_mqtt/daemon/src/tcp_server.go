@@ -2,10 +2,21 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net"
+	"fmt"
 	"os"
+	"bytes"
 )
+
+
+
+type command struct {
+	Action string `json:"action"`
+	Topic string `json:"topic"`
+	Path_or_script string `json:"path_or_script"`
+}
+
 
 const (
 	CONN_HOST = "localhost"
@@ -13,9 +24,15 @@ const (
 	CONN_TYPE = "tcp"
 )
 
+type tcp_request struct {
+	action string
+	finish_client func(string)
+}
+
+
 
 // Handles incoming requests.
-func handleRequest(conn net.Conn) {
+func handleRequest(conn net.Conn) command {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 	// Read the incoming connection into the buffer.
@@ -23,13 +40,28 @@ func handleRequest(conn net.Conn) {
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 	}
+
+
+	parsed_json := command{ }
+	trimmed_bytes := bytes.Trim(buf, "\x00")
+	json.Unmarshal(trimmed_bytes, &parsed_json)
+
+
+	fmt.Println("command is:  ", parsed_json)
+
+	fmt.Println("action is: ", parsed_json.Action)
+	fmt.Println("topic is :", parsed_json.Topic)
+
+
 	// Send a response back to person contacting us.
 	conn.Write([]byte("Message received."))
 	// Close the connection when you're done with it.
 	conn.Close()
+
+	return parsed_json
 }
 
-func listen_tcp() {
+func listen_tcp(tcp_message  chan <- tcp_request) {
 	CONN_HOST := "localhost"
 	CONN_PORT := "3333"
 	CONN_TYPE := "tcp"
@@ -51,6 +83,6 @@ func listen_tcp() {
 			os.Exit(1)
 		}
 		// Handle connections in a new goroutine.
-		go handleRequest(conn)
+		handleRequest(conn)
 	}
 }

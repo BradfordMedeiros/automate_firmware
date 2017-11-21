@@ -5,10 +5,11 @@ import "fmt"
 func main() {
 
 	mqtt_messages := make(chan mqtt_message)
+	tcp_requests := make(chan tcp_request)
 
 	go listen("temperature", mqtt_messages)
 
-	go listen_tcp()
+	go listen_tcp(tcp_requests)
 	//mess:= mqtt_message { topic: "something", message: "somethingelse"}
 
 	//fmt.Println("value is ", mess)
