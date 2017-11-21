@@ -8,6 +8,7 @@ func main() {
 
 	go listen("temperature", mqtt_messages)
 
+	go listen_tcp()
 	//mess:= mqtt_message { topic: "something", message: "somethingelse"}
 
 	//fmt.Println("value is ", mess)
