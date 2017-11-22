@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -68,7 +67,6 @@ func send_message(ip string, port int, payload string) {
 		log.Fatalln(err)
 	}
 
-	fmt.Println("message is: ", payload)
 	conn.Write([]byte(payload + "\n"))
 	buff := make([]byte, 1024)
 	n, _ := conn.Read(buff)

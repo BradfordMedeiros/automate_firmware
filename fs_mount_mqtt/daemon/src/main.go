@@ -8,26 +8,35 @@ func main() {
 	tcp_requests := make(chan tcp_request)
 
 	go listen("temperature", mqtt_messages)
-
 	go listen_tcp(tcp_requests)
-	//mess:= mqtt_message { topic: "something", message: "somethingelse"}
 
-	//fmt.Println("value is ", mess)
+	mqtt_topic_manager := mqtt_manager{ }
 
 	for {
-		x := <- mqtt_messages
-		fmt.Println("topic: ", x)
-	}
-	/*for {
-		select {
-		case b = <-freeList:
-		// Got one; nothing more to do.
-		default:
-		// None free, so allocate a new one.
-			b = new(Buffer)
-		}
-		load(b)              // Read next message from the net.
-		serverChan <- b      // Send to server.
-	}*/
+	  select {
+		case mqtt := <-mqtt_messages:
+			fmt.Println("received mqtt: ", mqtt.topic)
+		case request := <-tcp_requests:
+			fmt.Println("received request: ", request.action)
 
+			action_type := request.action.Action
+
+		  	if action_type  ==  "list" {
+				request.finish_client(mqtt_topic_manager.list_subscription())
+			}else if action_type == "reset" {
+				request.finish_client("ok - placeholder")
+			}else if action_type == "topic_path" {
+				mqtt_topic_manager.add_file_subscription(request.action.Topic, request.action.Path_or_script)
+			}else if action_type == "topic_script" {
+				mqtt_topic_manager.add_script_subscription(request.action.Topic, request.action.Path_or_script)
+			}else if action_type == "delete" {
+				mqtt_topic_manager.remove_subscription("placeholder id")
+			}else {
+				request.finish_client("error - invalid command")
+			}
+
+
+		}
+
+	}
 }

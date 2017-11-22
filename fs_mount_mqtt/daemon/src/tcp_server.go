@@ -25,14 +25,14 @@ const (
 )
 
 type tcp_request struct {
-	action string
+	action command
 	finish_client func(string)
 }
 
 
 
 // Handles incoming requests.
-func handleRequest(conn net.Conn) command {
+func handleRequest(conn net.Conn, tcp_message  chan <- tcp_request) {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 	// Read the incoming connection into the buffer.
@@ -46,19 +46,17 @@ func handleRequest(conn net.Conn) command {
 	trimmed_bytes := bytes.Trim(buf, "\x00")
 	json.Unmarshal(trimmed_bytes, &parsed_json)
 
+	finish_client :=  func (message string) {
+		// Send a response back to person contacting us.
+		conn.Write([]byte(message))
+		// Close the connection when you're done with it.
+		conn.Close()
+	}
 
-	fmt.Println("command is:  ", parsed_json)
-
-	fmt.Println("action is: ", parsed_json.Action)
-	fmt.Println("topic is :", parsed_json.Topic)
+	tcp_message <- tcp_request{ action: parsed_json, finish_client: finish_client}
 
 
-	// Send a response back to person contacting us.
-	conn.Write([]byte("Message received."))
-	// Close the connection when you're done with it.
-	conn.Close()
 
-	return parsed_json
 }
 
 func listen_tcp(tcp_message  chan <- tcp_request) {
@@ -72,7 +70,7 @@ func listen_tcp(tcp_message  chan <- tcp_request) {
 		fmt.Println("Error listening:", err.Error())
 		os.Exit(1)
 	}
-	// Close the listener when the application closes.
+
 	defer l.Close()
 	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 	for {
@@ -83,6 +81,6 @@ func listen_tcp(tcp_message  chan <- tcp_request) {
 			os.Exit(1)
 		}
 		// Handle connections in a new goroutine.
-		handleRequest(conn)
+		handleRequest(conn, tcp_message)
 	}
 }
