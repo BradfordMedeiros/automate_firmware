@@ -8,7 +8,7 @@ import (
 )
 
 type mqtt_message struct {
-	topic string
+	topic   string
 	message string
 }
 
@@ -32,11 +32,7 @@ func connect(clientId string) mqtt.Client {
 	return client
 }
 
-func listen(topic string, mqtt_messages  chan <- mqtt_message) {
-	client := connect("sub")
-	client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		mqtt_messages <- mqtt_message{ topic: msg.Topic(), message: string(msg.Payload())}
-	})
+func listen() mqtt.Client {
+	client := connect("fs_mount_mqtt")
+	return client
 }
-
-
