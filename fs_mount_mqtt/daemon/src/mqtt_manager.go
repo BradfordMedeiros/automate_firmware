@@ -94,3 +94,7 @@ func (manager mqtt_manager) list_subscription() string {
 		return list_value
 	}
 }
+
+func (mqtt_manager) handle_mqtt_message(topic string, value string){
+	fmt.Println("mqtt message: ", topic, " value: ", value)
+}

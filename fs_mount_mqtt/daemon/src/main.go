@@ -5,19 +5,21 @@ import "fmt"
 func main() {
 
 	client := listen()
-	//mqtt_messages := make(chan mqtt_message)
+	mqtt_messages := make(chan mqtt_message)
 	tcp_requests := make(chan tcp_request)
 
 	go listen_tcp(tcp_requests)
 
 	mqtt_topic_manager := New_mqtt_manager(client, func(message mqtt_message) {
-		//mqtt_messages <- message
+		mqtt_messages <- message
 	})
 
 	for {
 		select {
-		/*case mqtt := <-mqtt_messages:
-			fmt.Println("received mqtt: ", mqtt.topic)*/
+		case mqtt := <-mqtt_messages:
+			fmt.Println("received mqtt: ", mqtt.topic)
+			fmt.Println("value is : ", mqtt.message)
+			mqtt_topic_manager.handle_mqtt_message(mqtt.topic, mqtt.message)
 		case request := <-tcp_requests:
 			fmt.Println("received request: ", request.action)
 
