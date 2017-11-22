@@ -11,7 +11,7 @@ type param struct {
 }
 
 func (param *param) String() string {
-	return "hello world"
+	return param.value
 }
 
 func (param *param) Set(s string) error {
