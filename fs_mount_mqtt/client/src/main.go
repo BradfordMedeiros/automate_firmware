@@ -15,9 +15,8 @@ func (param *param) String() string {
 }
 
 func (param *param) Set(s string) error {
-	//topic_flag.FlagValue, _ = strconv.Atoi(s)
-	(*param).is_set = true
-	(*param).value = s
+	param.is_set = true
+	param.value = s
 	return nil
 }
 
