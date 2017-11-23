@@ -50,7 +50,12 @@ func main() {
 				mqtt_topic_manager.add_script_subscription(request.action.Topic, request.action.Path_or_script)
 				request.finish_client("ok")
 			} else if action_type == "delete" {
-				mqtt_topic_manager.remove_subscription("placeholder id")
+				err := mqtt_topic_manager.remove_subscription(request.action.Id)
+				if err == nil {
+					request.finish_client("ok")
+				}else{
+					request.finish_client(err.Error())
+				}
 			} else {
 				request.finish_client("error - invalid command")
 			}

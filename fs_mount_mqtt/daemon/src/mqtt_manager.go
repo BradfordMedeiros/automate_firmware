@@ -2,6 +2,8 @@ package main
 
 import mqtt "github.com/eclipse/paho.mqtt.golang"
 import "fmt"
+import "github.com/nu7hatch/gouuid"
+import "errors"
 
 type subscription struct {
 	uuid      string
@@ -29,10 +31,16 @@ func New_mqtt_manager(mqtt_client mqtt.Client, on_mqtt_message func(mqtt_message
 	return mqtt_manager{topic_subscriptions: subscriptions, mqtt_client: mqtt_client, on_mqtt_message: on_mqtt_message}
 }
 
-func add_subscription(manager *mqtt_manager, topic string, file_path string, is_script bool) {
-	subscriptions, ok := (*manager).topic_subscriptions[topic]
-	subscription_to_add := subscription{uuid: "testuuid", path: file_path, is_script: is_script}
+func add_subscription(manager *mqtt_manager, topic string, file_path string, is_script bool) error {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		return errors.New("Could not create uuid")
 
+	}
+
+	subscription_to_add := subscription{uuid: uuid.String(), path: file_path, is_script: is_script}
+
+	subscriptions, ok := (*manager).topic_subscriptions[topic]
 	if !contains_subscription(topic, &((*manager).topic_subscriptions)) {
 		(*manager).mqtt_client.Subscribe(topic, 0, func(_ mqtt.Client, msg mqtt.Message) {
 			message := mqtt_message{topic: msg.Topic(), message: string(msg.Payload())}
@@ -47,18 +55,42 @@ func add_subscription(manager *mqtt_manager, topic string, file_path string, is_
 		(*manager).topic_subscriptions[topic] = append((*manager).topic_subscriptions[topic], subscription_to_add)
 	}
 
+	return nil
 }
 
-func (manager mqtt_manager) add_script_subscription(topic string, file_path string) {
-	add_subscription(&manager, topic, file_path, true)
+func (manager mqtt_manager) add_script_subscription(topic string, file_path string) error {
+	return add_subscription(&manager, topic, file_path, true)
 }
 
-func (manager mqtt_manager) add_file_subscription(topic string, file_path string) {
-	add_subscription(&manager, topic, file_path, false)
+func (manager mqtt_manager) add_file_subscription(topic string, file_path string) error {
+	return add_subscription(&manager, topic, file_path, false)
 }
 
-func (manager mqtt_manager) remove_subscription(uuid string) {
+func (manager mqtt_manager) remove_subscription(uuid string) error {
 
+	topic := ""
+	index_to_remove := -1
+
+	for subscription_topic, subscriptions := range manager.topic_subscriptions {
+		for index, subscription := range subscriptions {
+			if subscription.uuid == uuid{
+				topic  = subscription_topic
+				index_to_remove = index
+			}
+		}
+	}
+
+	if index_to_remove == -1 {
+		return errors.New("UUID does not exist")
+	}else{
+		manager.topic_subscriptions[topic] = append(manager.topic_subscriptions[topic][:index_to_remove], manager.topic_subscriptions[topic][index_to_remove+1:]...)
+		if  len(manager.topic_subscriptions) == 0{
+			delete(manager.topic_subscriptions, topic)
+			manager.mqtt_client.Unsubscribe(topic)
+		}
+
+		return nil
+	}
 }
 
 func (manager *mqtt_manager) reset() {

@@ -12,6 +12,7 @@ type command struct {
 	Action         string `json:"action"`
 	Topic          string `json:"topic"`
 	Path_or_script string `json:"path_or_script"`
+	Id string `json:"id"`
 }
 
 const (
