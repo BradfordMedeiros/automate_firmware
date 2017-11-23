@@ -1,14 +1,48 @@
 package main
 
 import "fmt"
+import "flag"
+import "strconv"
+
+
+type param struct {
+	is_set bool
+	value string
+}
+
+func (param *param) String() string {
+	return param.value
+}
+
+func (param *param) Set(s string) error {
+	param.is_set = true
+	param.value = s
+	return nil
+}
 
 func main() {
+	brokerPort := param{ is_set: false }
+	flag.Var(&brokerPort, "broker", "port of the broker")
+	port := param{ is_set: false }
+
+
+	flag.Var(&port, "port", "port to host the daemon on (default = 9002)")
+	flag.Parse()
+
+	tcpPort :=  9002
+	if port.is_set {
+		portConverted, err := strconv.Atoi(port.value)
+		tcpPort = portConverted
+		if err != nil {
+			fmt.Println("error")
+		}
+	}
 
 	client := listen()
 	mqtt_messages := make(chan mqtt_message)
 	tcp_requests := make(chan tcp_request)
 
-	go listen_tcp(tcp_requests)
+	go listen_tcp(tcpPort,  tcp_requests)
 
 	mqtt_topic_manager := New_mqtt_manager(client, func(message mqtt_message) {
 		mqtt_messages <- message

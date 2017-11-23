@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"time"
@@ -14,7 +13,7 @@ type mqtt_message struct {
 
 func createClientOptions(clientId string) *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s", "127.0.0.1:1883"))
+	opts.AddBroker("tcp://127.0.0.1:1883")
 	opts.SetClientID("fs_mount_mqtt")
 	return opts
 }

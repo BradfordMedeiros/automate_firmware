@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 )
 
 type command struct {
@@ -51,12 +52,11 @@ func handleRequest(conn net.Conn, tcp_message chan<- tcp_request) {
 
 }
 
-func listen_tcp(tcp_message chan<- tcp_request) {
+func listen_tcp(port int, tcp_message chan<- tcp_request) {
 	CONN_HOST := "localhost"
-	CONN_PORT := "3333"
+	CONN_PORT := strconv.Itoa(port)
 	CONN_TYPE := "tcp"
 
-	// Listen for incoming connections.
 	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
@@ -66,13 +66,11 @@ func listen_tcp(tcp_message chan<- tcp_request) {
 	defer l.Close()
 	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 	for {
-		// Listen for an incoming connection.
 		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting: ", err.Error())
 			os.Exit(1)
 		}
-		// Handle connections in a new goroutine.
 		handleRequest(conn, tcp_message)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type basic_command struct {
@@ -61,14 +62,14 @@ func delete_subscription(uuid string) {
 func send_message(ip string, port int, payload string) {
 	addr := strings.Join([]string{ip, strconv.Itoa(port)}, ":")
 	conn, err := net.Dial("tcp", addr)
-	defer conn.Close()
 
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("could not create TCP connection to daemon")
+	}else{
+		defer conn.Close()
+		conn.Write([]byte(payload + "\n"))
+		buff := make([]byte, 1024)
+		n, _ := conn.Read(buff)
+		log.Printf("Receive: %s", buff[:n])
 	}
-
-	conn.Write([]byte(payload + "\n"))
-	buff := make([]byte, 1024)
-	n, _ := conn.Read(buff)
-	log.Printf("Receive: %s", buff[:n])
 }

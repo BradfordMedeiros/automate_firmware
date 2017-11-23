@@ -2,6 +2,7 @@ package main
 
 import mqtt "github.com/eclipse/paho.mqtt.golang"
 import "fmt"
+import "os"
 import "github.com/nu7hatch/gouuid"
 import "errors"
 
@@ -125,6 +126,18 @@ func (manager mqtt_manager) list_subscription() string {
 	}
 }
 
-func (mqtt_manager) handle_mqtt_message(topic string, value string){
-	fmt.Println("mqtt message: ", topic, " value: ", value)
+func (manager mqtt_manager) handle_mqtt_message(topic string, value string){
+	subscriptions, ok := manager.topic_subscriptions[topic]
+	if !ok {
+		fmt.Fprintln(os.Stderr, "fs_mount_mqtt error: handle_mqtt_message: got topic ", topic, " when not subscribed to topic")
+	}else{
+		for _, subscription := range subscriptions {
+			if subscription.is_script {
+				execute_file(subscription.path, topic, value)
+			}else{
+				write_file(subscription.path, value)
+			}
+		}
+	}
+
 }
