@@ -97,9 +97,7 @@ func (manager *mqtt_manager) reset() {
 	for topic, _ := range manager.topic_subscriptions {
 		manager.mqtt_client.Unsubscribe(topic)
 	}
-	fmt.Println("in reset in mqttmanager")
 	manager.topic_subscriptions =  make(map[string][]subscription)
-
 }
 
 func (manager mqtt_manager) list_subscription() string {
