@@ -24,7 +24,7 @@ type settings struct {
 	broker_url string
 }
 
-func get_settings () settings {
+func get_command_line_options() settings {
 	brokerPort := param{ is_set: false }
 	flag.Var(&brokerPort, "broker", "port of the broker")
 	port := param{ is_set: false }

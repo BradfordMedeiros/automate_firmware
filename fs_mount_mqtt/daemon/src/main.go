@@ -4,15 +4,13 @@ import "fmt"
 
 func main() {
 
-	settings := get_settings()
+	settings := get_command_line_options()
+	client := connect_to_mqtt_broker()
 
-
-	client := listen()
-	mqtt_messages := make(chan mqtt_message)
 	tcp_requests := make(chan tcp_request)
-
 	go listen_tcp(settings.tcp_port,  tcp_requests)
 
+	mqtt_messages := make(chan mqtt_message)
 	mqtt_topic_manager := New_mqtt_manager(client, func(message mqtt_message) {
 		mqtt_messages <- message
 	})

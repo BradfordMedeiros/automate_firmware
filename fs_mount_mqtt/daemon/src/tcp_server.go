@@ -16,12 +16,6 @@ type command struct {
 	Id string `json:"id"`
 }
 
-const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "3333"
-	CONN_TYPE = "tcp"
-)
-
 type tcp_request struct {
 	action        command
 	finish_client func(string)
@@ -57,16 +51,16 @@ func listen_tcp(port int, tcp_message chan<- tcp_request) {
 	CONN_PORT := strconv.Itoa(port)
 	CONN_TYPE := "tcp"
 
-	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	server, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
 		os.Exit(1)
 	}
+	defer server.Close()
 
-	defer l.Close()
 	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 	for {
-		conn, err := l.Accept()
+		conn, err := server.Accept()
 		if err != nil {
 			fmt.Println("Error accepting: ", err.Error())
 			os.Exit(1)

@@ -31,7 +31,7 @@ func connect(clientId string) mqtt.Client {
 	return client
 }
 
-func listen() mqtt.Client {
+func connect_to_mqtt_broker() mqtt.Client {
 	client := connect("fs_mount_mqtt")
 	return client
 }
