@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 type basic_command struct {
@@ -14,46 +14,46 @@ type basic_command struct {
 }
 
 type topic_command struct {
-	Action string `json:"action"`
-	Topic string `json:"topic"`
+	Action         string `json:"action"`
+	Topic          string `json:"topic"`
 	Path_or_script string `json:"path_or_script"`
 }
 
 type delete_command struct {
 	Action string `json:"action"`
-	Id string `json:"id"`
+	Id     string `json:"id"`
 }
 
 func list() {
-	command := basic_command { Action: "list" }
+	command := basic_command{Action: "list"}
 	json_string, _ := json.Marshal(command)
 
 	send_message("127.0.0.1", 3333, string(json_string))
 }
 
 func reset() {
-	command := basic_command { Action: "reset" }
+	command := basic_command{Action: "reset"}
 	json_string, _ := json.Marshal(command)
 
 	send_message("127.0.0.1", 3333, string(json_string))
 }
 
 func add_topic_with_path(topic string, file_path string) {
-	command := topic_command { Action: "topic_path", Topic: topic, Path_or_script: file_path}
+	command := topic_command{Action: "topic_path", Topic: topic, Path_or_script: file_path}
 	json_string, _ := json.Marshal(command)
 
 	send_message("127.0.0.1", 3333, string(json_string))
 }
 
 func add_topic_with_script(topic string, script_path string) {
-	command := topic_command { Action: "topic_script", Topic: topic, Path_or_script: script_path}
+	command := topic_command{Action: "topic_script", Topic: topic, Path_or_script: script_path}
 	json_string, _ := json.Marshal(command)
 
 	send_message("127.0.0.1", 3333, string(json_string))
 }
 
 func delete_subscription(uuid string) {
-	command :=  delete_command { Action: "delete", Id: uuid }
+	command := delete_command{Action: "delete", Id: uuid}
 	json_string, _ := json.Marshal(command)
 
 	send_message("127.0.0.1", 3333, string(json_string))
@@ -65,7 +65,7 @@ func send_message(ip string, port int, payload string) {
 
 	if err != nil {
 		fmt.Println("could not create TCP connection to daemon")
-	}else{
+	} else {
 		defer conn.Close()
 		conn.Write([]byte(payload + "\n"))
 		buff := make([]byte, 1024)

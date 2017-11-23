@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 mkdir $(pwd)/go
 GOPATH="$(pwd)/go"

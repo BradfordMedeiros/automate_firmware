@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 mkdir $HOME/.go
 GOPATH="$HOME/.go"

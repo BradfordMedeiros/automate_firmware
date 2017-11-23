@@ -7,7 +7,7 @@ import (
 
 type param struct {
 	is_set bool
-	value string
+	value  string
 }
 
 func (param *param) String() string {
@@ -25,16 +25,16 @@ func print_error() {
 }
 
 func main() {
-	topicFlag := param{ is_set: false }
+	topicFlag := param{is_set: false}
 	flag.Var(&topicFlag, "topic", "topic to subscribe to")
 
-	pathFlag := param{ is_set: false }
+	pathFlag := param{is_set: false}
 	flag.Var(&pathFlag, "path", "file to write when a topic is published")
 
-	scriptFlag := param{ is_set: false }
+	scriptFlag := param{is_set: false}
 	flag.Var(&scriptFlag, "script", "script to call when a topic is published")
 
-	deleteFlag := param{ is_set: false }
+	deleteFlag := param{is_set: false}
 	flag.Var(&deleteFlag, "delete", "uuid of subscription to delete")
 
 	resetFlag := flag.Bool("reset", false, "reset all subscriptions")
@@ -44,21 +44,21 @@ func main() {
 
 	if *listFlag {
 		list()
-	}else if *resetFlag {
+	} else if *resetFlag {
 		reset()
-	}else if deleteFlag.is_set {
+	} else if deleteFlag.is_set {
 		delete_subscription(deleteFlag.value)
-	}else if topicFlag.is_set {
+	} else if topicFlag.is_set {
 		if scriptFlag.is_set && pathFlag.is_set {
 			print_error()
-		}else if scriptFlag.is_set {
+		} else if scriptFlag.is_set {
 			add_topic_with_script(topicFlag.value, scriptFlag.value)
-		}else if pathFlag.is_set {
+		} else if pathFlag.is_set {
 			add_topic_with_path(topicFlag.value, pathFlag.value)
-		}else{
+		} else {
 			print_error()
 		}
-	}else {
+	} else {
 		fmt.Println("No parameters specified- see usage\n")
 		flag.Usage()
 	}
