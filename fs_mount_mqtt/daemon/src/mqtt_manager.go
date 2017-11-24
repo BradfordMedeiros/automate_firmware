@@ -8,8 +8,6 @@ import "errors"
 import "encoding/json"
 import "io/ioutil"
 
-
-
 type subscription struct {
 	Uuid      string
 	Path      string
@@ -20,7 +18,7 @@ type mqtt_manager struct {
 	Topic_subscriptions map[string][]subscription
 	mqtt_client         mqtt.Client
 	on_mqtt_message     func(mqtt_message)
-	serialization_file string
+	serialization_file  string
 }
 
 func contains_subscription(topicToCheck string, topic_subscriptions *map[string][]subscription) bool {
@@ -36,16 +34,16 @@ func New_mqtt_manager(mqtt_client mqtt.Client, on_mqtt_message func(mqtt_message
 	subscriptions := make(map[string][]subscription)
 	manager := mqtt_manager{
 		Topic_subscriptions: subscriptions,
-		mqtt_client: mqtt_client,
-		on_mqtt_message: on_mqtt_message,
-		serialization_file: serialization_file,
+		mqtt_client:         mqtt_client,
+		on_mqtt_message:     on_mqtt_message,
+		serialization_file:  serialization_file,
 	}
 	deserialized_subscriptions := manager.deserialize_state()
 	for topic, subscriptions := range deserialized_subscriptions {
 		for _, subscription := range subscriptions {
 			if subscription.Is_script {
 				manager.add_script_subscription(topic, subscription.Path)
-			}else {
+			} else {
 				manager.add_file_subscription(topic, subscription.Path)
 			}
 		}
@@ -96,8 +94,8 @@ func (manager mqtt_manager) remove_subscription(uuid string) error {
 
 	for subscription_topic, subscriptions := range manager.Topic_subscriptions {
 		for index, subscription := range subscriptions {
-			if subscription.Uuid == uuid{
-				topic  = subscription_topic
+			if subscription.Uuid == uuid {
+				topic = subscription_topic
 				index_to_remove = index
 			}
 		}
@@ -106,9 +104,9 @@ func (manager mqtt_manager) remove_subscription(uuid string) error {
 	if index_to_remove == -1 {
 		manager.on_subscription_change()
 		return errors.New("UUID does not exist")
-	}else{
+	} else {
 		manager.Topic_subscriptions[topic] = append(manager.Topic_subscriptions[topic][:index_to_remove], manager.Topic_subscriptions[topic][index_to_remove+1:]...)
-		if  len(manager.Topic_subscriptions) == 0{
+		if len(manager.Topic_subscriptions) == 0 {
 			delete(manager.Topic_subscriptions, topic)
 			manager.mqtt_client.Unsubscribe(topic)
 		}
@@ -122,7 +120,7 @@ func (manager *mqtt_manager) reset() {
 	for topic, _ := range manager.Topic_subscriptions {
 		manager.mqtt_client.Unsubscribe(topic)
 	}
-	manager.Topic_subscriptions =  make(map[string][]subscription)
+	manager.Topic_subscriptions = make(map[string][]subscription)
 	manager.on_subscription_change()
 }
 
@@ -151,15 +149,15 @@ func (manager mqtt_manager) list_subscription() string {
 	}
 }
 
-func (manager mqtt_manager) handle_mqtt_message(topic string, value string){
+func (manager mqtt_manager) handle_mqtt_message(topic string, value string) {
 	subscriptions, ok := manager.Topic_subscriptions[topic]
 	if !ok {
 		fmt.Fprintln(os.Stderr, "fs_mount_mqtt error: handle_mqtt_message: got topic ", topic, " when not subscribed to topic")
-	}else{
+	} else {
 		for _, subscription := range subscriptions {
 			if subscription.Is_script {
 				execute_file(subscription.Path, topic, value)
-			}else{
+			} else {
 				write_file(subscription.Path, value)
 			}
 		}
@@ -167,19 +165,19 @@ func (manager mqtt_manager) handle_mqtt_message(topic string, value string){
 
 }
 
-func (manager mqtt_manager) on_subscription_change(){
+func (manager mqtt_manager) on_subscription_change() {
 	manager.serialize_state()
 }
 
-func (manager *mqtt_manager) serialize_state() []byte{
+func (manager *mqtt_manager) serialize_state() []byte {
 	json_string, _ := json.Marshal(manager)
 	_ = ioutil.WriteFile(manager.serialization_file, json_string, 0644)
 	return json_string
 }
 
 func (manager *mqtt_manager) deserialize_state() map[string][]subscription {
-	new_manager := mqtt_manager{ }
-	serialized_data, _  := ioutil.ReadFile(manager.serialization_file)
+	new_manager := mqtt_manager{}
+	serialized_data, _ := ioutil.ReadFile(manager.serialization_file)
 	json.Unmarshal(serialized_data, &new_manager)
 	return new_manager.Topic_subscriptions
 }

@@ -8,7 +8,7 @@ func main() {
 	client := connect_to_mqtt_broker()
 
 	tcp_requests := make(chan tcp_request)
-	go listen_tcp(settings.tcp_port,  tcp_requests)
+	go listen_tcp(settings.tcp_port, tcp_requests)
 
 	mqtt_messages := make(chan mqtt_message)
 	mqtt_topic_manager := New_mqtt_manager(client, func(message mqtt_message) {
@@ -38,7 +38,7 @@ func main() {
 				err := mqtt_topic_manager.remove_subscription(request.action.Id)
 				if err == nil {
 					request.finish_client("ok")
-				}else{
+				} else {
 					request.finish_client(err.Error())
 				}
 			} else {
