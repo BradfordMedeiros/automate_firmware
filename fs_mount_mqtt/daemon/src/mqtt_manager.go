@@ -174,7 +174,6 @@ func (manager mqtt_manager) on_subscription_change(){
 func (manager *mqtt_manager) serialize_state() []byte{
 	json_string, _ := json.Marshal(manager)
 	_ = ioutil.WriteFile(manager.serialization_file, json_string, 0644)
-	fmt.Println("wrote file: ", manager.serialization_file)
 	return json_string
 }
 
