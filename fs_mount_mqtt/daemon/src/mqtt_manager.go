@@ -40,7 +40,16 @@ func New_mqtt_manager(mqtt_client mqtt.Client, on_mqtt_message func(mqtt_message
 		on_mqtt_message: on_mqtt_message,
 		serialization_file: serialization_file,
 	}
-	manager.deserialize_state()
+	deserialized_subscriptions := manager.deserialize_state()
+	for topic, subscriptions := range deserialized_subscriptions {
+		for _, subscription := range subscriptions {
+			if subscription.Is_script {
+				manager.add_script_subscription(topic, subscription.Path)
+			}else {
+				manager.add_file_subscription(topic, subscription.Path)
+			}
+		}
+	}
 	return manager
 }
 
@@ -162,16 +171,16 @@ func (manager mqtt_manager) on_subscription_change(){
 	manager.serialize_state()
 }
 
-func (manager mqtt_manager) serialize_state() []byte{
+func (manager *mqtt_manager) serialize_state() []byte{
 	json_string, _ := json.Marshal(manager)
 	_ = ioutil.WriteFile(manager.serialization_file, json_string, 0644)
 	fmt.Println("wrote file: ", manager.serialization_file)
 	return json_string
 }
 
-func (manager *mqtt_manager) deserialize_state() {
+func (manager *mqtt_manager) deserialize_state() map[string][]subscription {
 	new_manager := mqtt_manager{ }
 	serialized_data, _  := ioutil.ReadFile(manager.serialization_file)
 	json.Unmarshal(serialized_data, &new_manager)
-	manager.Topic_subscriptions = new_manager.Topic_subscriptions
+	return new_manager.Topic_subscriptions
 }
