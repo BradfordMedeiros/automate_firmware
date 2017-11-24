@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -64,12 +63,12 @@ func send_message(ip string, port int, payload string) {
 	conn, err := net.Dial("tcp", addr)
 
 	if err != nil {
-		fmt.Println("could not create TCP connection to daemon")
+		fmt.Println("Could not create connection to daemon")
 	} else {
 		defer conn.Close()
 		conn.Write([]byte(payload + "\n"))
 		buff := make([]byte, 1024)
 		n, _ := conn.Read(buff)
-		log.Printf("Receive: %s", buff[:n])
+		fmt.Println(string(buff[:n]))
 	}
 }
