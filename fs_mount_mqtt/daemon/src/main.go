@@ -1,8 +1,8 @@
 package main
 
-import "fmt"
-
 func main() {
+
+	const SAVE_FILE_LOCATION string = "/home/brad/automate/automate_firmware/fs_mount_mqtt/daemon/save_file"
 
 	settings := get_command_line_options()
 	client := connect_to_mqtt_broker()
@@ -13,15 +13,13 @@ func main() {
 	mqtt_messages := make(chan mqtt_message)
 	mqtt_topic_manager := New_mqtt_manager(client, func(message mqtt_message) {
 		mqtt_messages <- message
-	})
+	}, SAVE_FILE_LOCATION)
 
 	for {
 		select {
 		case mqtt := <-mqtt_messages:
 			mqtt_topic_manager.handle_mqtt_message(mqtt.topic, mqtt.message)
 		case request := <-tcp_requests:
-			fmt.Println("received request: ", request.action)
-
 			action_type := request.action.Action
 
 			if action_type == "list" {

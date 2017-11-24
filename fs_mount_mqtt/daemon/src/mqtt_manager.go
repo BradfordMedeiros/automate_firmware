@@ -5,17 +5,22 @@ import "fmt"
 import "os"
 import "github.com/nu7hatch/gouuid"
 import "errors"
+import "encoding/json"
+import "io/ioutil"
+
+
 
 type subscription struct {
-	uuid      string
-	path      string
-	is_script bool // if not script is file path, how to do enums?
+	Uuid      string
+	Path      string
+	Is_script bool // if not script is file path, how to do enums?
 }
 
 type mqtt_manager struct {
-	topic_subscriptions map[string][]subscription
+	Topic_subscriptions map[string][]subscription
 	mqtt_client         mqtt.Client
 	on_mqtt_message     func(mqtt_message)
+	serialization_file string
 }
 
 func contains_subscription(topicToCheck string, topic_subscriptions *map[string][]subscription) bool {
@@ -27,9 +32,16 @@ func contains_subscription(topicToCheck string, topic_subscriptions *map[string]
 	return false
 }
 
-func New_mqtt_manager(mqtt_client mqtt.Client, on_mqtt_message func(mqtt_message)) mqtt_manager {
+func New_mqtt_manager(mqtt_client mqtt.Client, on_mqtt_message func(mqtt_message), serialization_file string) mqtt_manager {
 	subscriptions := make(map[string][]subscription)
-	return mqtt_manager{topic_subscriptions: subscriptions, mqtt_client: mqtt_client, on_mqtt_message: on_mqtt_message}
+	manager := mqtt_manager{
+		Topic_subscriptions: subscriptions,
+		mqtt_client: mqtt_client,
+		on_mqtt_message: on_mqtt_message,
+		serialization_file: serialization_file,
+	}
+	manager.deserialize_state()
+	return manager
 }
 
 func add_subscription(manager *mqtt_manager, topic string, file_path string, is_script bool) error {
@@ -39,10 +51,10 @@ func add_subscription(manager *mqtt_manager, topic string, file_path string, is_
 
 	}
 
-	subscription_to_add := subscription{uuid: uuid.String(), path: file_path, is_script: is_script}
+	subscription_to_add := subscription{Uuid: uuid.String(), Path: file_path, Is_script: is_script}
 
-	subscriptions, ok := (*manager).topic_subscriptions[topic]
-	if !contains_subscription(topic, &((*manager).topic_subscriptions)) {
+	subscriptions, ok := (*manager).Topic_subscriptions[topic]
+	if !contains_subscription(topic, &((*manager).Topic_subscriptions)) {
 		(*manager).mqtt_client.Subscribe(topic, 0, func(_ mqtt.Client, msg mqtt.Message) {
 			message := mqtt_message{topic: msg.Topic(), message: string(msg.Payload())}
 			(*manager).on_mqtt_message(message)
@@ -50,12 +62,13 @@ func add_subscription(manager *mqtt_manager, topic string, file_path string, is_
 	}
 
 	if ok {
-		(*manager).topic_subscriptions[topic] = append(subscriptions, subscription_to_add)
+		(*manager).Topic_subscriptions[topic] = append(subscriptions, subscription_to_add)
 	} else {
-		(*manager).topic_subscriptions[topic] = make([]subscription, 0)
-		(*manager).topic_subscriptions[topic] = append((*manager).topic_subscriptions[topic], subscription_to_add)
+		(*manager).Topic_subscriptions[topic] = make([]subscription, 0)
+		(*manager).Topic_subscriptions[topic] = append((*manager).Topic_subscriptions[topic], subscription_to_add)
 	}
 
+	manager.on_subscription_change()
 	return nil
 }
 
@@ -72,9 +85,9 @@ func (manager mqtt_manager) remove_subscription(uuid string) error {
 	topic := ""
 	index_to_remove := -1
 
-	for subscription_topic, subscriptions := range manager.topic_subscriptions {
+	for subscription_topic, subscriptions := range manager.Topic_subscriptions {
 		for index, subscription := range subscriptions {
-			if subscription.uuid == uuid{
+			if subscription.Uuid == uuid{
 				topic  = subscription_topic
 				index_to_remove = index
 			}
@@ -82,38 +95,41 @@ func (manager mqtt_manager) remove_subscription(uuid string) error {
 	}
 
 	if index_to_remove == -1 {
+		manager.on_subscription_change()
 		return errors.New("UUID does not exist")
 	}else{
-		manager.topic_subscriptions[topic] = append(manager.topic_subscriptions[topic][:index_to_remove], manager.topic_subscriptions[topic][index_to_remove+1:]...)
-		if  len(manager.topic_subscriptions) == 0{
-			delete(manager.topic_subscriptions, topic)
+		manager.Topic_subscriptions[topic] = append(manager.Topic_subscriptions[topic][:index_to_remove], manager.Topic_subscriptions[topic][index_to_remove+1:]...)
+		if  len(manager.Topic_subscriptions) == 0{
+			delete(manager.Topic_subscriptions, topic)
 			manager.mqtt_client.Unsubscribe(topic)
 		}
 
+		manager.on_subscription_change()
 		return nil
 	}
 }
 
 func (manager *mqtt_manager) reset() {
-	for topic, _ := range manager.topic_subscriptions {
+	for topic, _ := range manager.Topic_subscriptions {
 		manager.mqtt_client.Unsubscribe(topic)
 	}
-	manager.topic_subscriptions =  make(map[string][]subscription)
+	manager.Topic_subscriptions =  make(map[string][]subscription)
+	manager.on_subscription_change()
 }
 
 func (manager mqtt_manager) list_subscription() string {
 	list_value := ""
-	for topic, subscriptions := range manager.topic_subscriptions {
+	for topic, subscriptions := range manager.Topic_subscriptions {
 		for _, subscription := range subscriptions {
 			list_value = list_value + "\ntopic: " + topic
-			list_value = list_value + "    file: " + subscription.path
-			list_value = list_value + "    uuid: " + subscription.uuid
+			list_value = list_value + "    file: " + subscription.Path
+			list_value = list_value + "    uuid: " + subscription.Uuid
 
-			if subscription.is_script {
-				list_value = list_value + "    type: " + subscription.path
+			if subscription.Is_script {
+				list_value = list_value + "    type: " + subscription.Path
 
 			} else {
-				list_value = list_value + "    type: " + subscription.path
+				list_value = list_value + "    type: " + subscription.Path
 			}
 
 		}
@@ -127,17 +143,35 @@ func (manager mqtt_manager) list_subscription() string {
 }
 
 func (manager mqtt_manager) handle_mqtt_message(topic string, value string){
-	subscriptions, ok := manager.topic_subscriptions[topic]
+	subscriptions, ok := manager.Topic_subscriptions[topic]
 	if !ok {
 		fmt.Fprintln(os.Stderr, "fs_mount_mqtt error: handle_mqtt_message: got topic ", topic, " when not subscribed to topic")
 	}else{
 		for _, subscription := range subscriptions {
-			if subscription.is_script {
-				execute_file(subscription.path, topic, value)
+			if subscription.Is_script {
+				execute_file(subscription.Path, topic, value)
 			}else{
-				write_file(subscription.path, value)
+				write_file(subscription.Path, value)
 			}
 		}
 	}
 
+}
+
+func (manager mqtt_manager) on_subscription_change(){
+	manager.serialize_state()
+}
+
+func (manager mqtt_manager) serialize_state() []byte{
+	json_string, _ := json.Marshal(manager)
+	_ = ioutil.WriteFile(manager.serialization_file, json_string, 0644)
+	fmt.Println("wrote file: ", manager.serialization_file)
+	return json_string
+}
+
+func (manager *mqtt_manager) deserialize_state() {
+	new_manager := mqtt_manager{ }
+	serialized_data, _  := ioutil.ReadFile(manager.serialization_file)
+	json.Unmarshal(serialized_data, &new_manager)
+	manager.Topic_subscriptions = new_manager.Topic_subscriptions
 }
