@@ -33,7 +33,7 @@ func get_command_line_options() settings {
 	flag.Var(&port, "port", "port to host the daemon on (default = 9002)")
 	flag.Parse()
 
-	tcp_port :=  9002
+	tcp_port :=  3333
 	if port.is_set {
 		portConverted, err := strconv.Atoi(port.value)
 		tcp_port = portConverted

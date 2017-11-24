@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-sudo service automated stop
-sudo rm -rf /opt/automate
-sudo rm -rf /etc/init.d/automated
+sudo service fs_mount_mqtt stop
+sudo rm -rf /opt/fs_mount_mqtt
+sudo rm -rf /etc/init.d/fs_mount_mqtt
 sudo systemctl daemon-reload
