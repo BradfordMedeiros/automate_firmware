@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
 
-sudo apt-get remove jqgit
-
-it c
+sudo apt-get remove jq
