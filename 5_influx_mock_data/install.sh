@@ -3,7 +3,4 @@
 mkdir $(pwd)/go
 GOPATH="$(pwd)/go"
 export GOPATH
-go get github.com/eclipse/paho.mqtt.golang
-go get golang.org/x/net/websocket
-go get golang.org/x/net/proxy
 go get github.com/influxdata/influxdb/client/v2

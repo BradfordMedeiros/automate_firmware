@@ -3,17 +3,20 @@ package main
 import "fmt"
 
 type settings struct {
-	topic      string
-	min_value  int
-	max_value  int
-	data_type  string
-	fromYear   int
-	untilYear  int
-	fromMonth  int
-	untilMonth int
-	fromDay    int
-	untilDay   int
-	interval   string
+	topic          string
+	min_value      int
+	max_value      int
+	data_type      string
+	data           string
+	fromYear       int
+	untilYear      int
+	fromMonth      int
+	untilMonth     int
+	fromDay        int
+	untilDay       int
+	interval       string
+	influxHost     string
+	influxDatabase string
 }
 
 type param struct {

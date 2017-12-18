@@ -36,6 +36,12 @@ func main() {
 	intervalFlag := param{is_set: false}
 	flag.Var(&intervalFlag, "interval", "<month, day, minute, second>")
 
+	dataFlag := param{is_set: false}
+	flag.Var(&dataFlag, "data", "comma delimited list of possible values (category type)")
+
+	influxHostFlag := param{is_set: false}
+	influxDatabaseFlag := param{is_set: false}
+
 	minValue := flag.Int("min", 1, "minimum value to write for numeric data")
 	maxValue := flag.Int("max", 100, "maxmum value to write for numeric data")
 
@@ -50,17 +56,20 @@ func main() {
 	flag.Parse()
 
 	settings := settings{
-		topic:      topicFlag.value,
-		data_type:  typeFlag.value,
-		min_value:  *minValue,
-		max_value:  *maxValue,
-		fromYear:   *fromYear,
-		untilYear:  *untilYear,
-		fromMonth:  *fromMonth,
-		untilMonth: *untilMonth,
-		fromDay:    *fromDay,
-		untilDay:   *untilDay,
-		interval:   intervalFlag.value,
+		topic:          topicFlag.value,
+		data_type:      typeFlag.value,
+		data:           dataFlag.value,
+		min_value:      *minValue,
+		max_value:      *maxValue,
+		fromYear:       *fromYear,
+		untilYear:      *untilYear,
+		fromMonth:      *fromMonth,
+		untilMonth:     *untilMonth,
+		fromDay:        *fromDay,
+		untilDay:       *untilDay,
+		interval:       intervalFlag.value,
+		influxDatabase: influxDatabaseFlag.value,
+		influxHost:     influxHostFlag.value,
 	}
 
 	fmt.Println("settings topic is: ", settings)
@@ -92,33 +101,10 @@ func main() {
 	duration := get_interval_duration(settings.interval)
 
 	if settings.data_type == "category" {
-		run_category("test topic", "hot,cold,weather,time", duration, fromTime, untilTime)
+		run_category(settings.influxHost, settings.influxDatabase, settings.topic, settings.data, duration, fromTime, untilTime)
 	} else if settings.data_type == "numeric" {
-		run_numeric("test topic", settings.min_value, settings.max_value, duration, fromTime, untilTime)
+		run_numeric(settings.influxHost, settings.influxDatabase, settings.topic, settings.min_value, settings.max_value, duration, fromTime, untilTime)
 	} else {
 		print_error()
 	}
-
-	/*newDate := fromTime.AddDate(0,0,1)
-
-	oneSecond := time.Duration(time.Second)
-	oneMinute := time.Duration(time.Minute)
-
-
-	fmt.Println("new time: ", newDate)
-	fmt.Println("duration: ", oneSecond)
-	fmt.Println("minute: ", oneMinute)
-	fmt.Println("time diff is: ", newDate.After(fromTime))*/
-
-	/*if topicFlag.is_set {
-		fmt.Println("topic is: ", topicFlag.value)
-		fmt.Println("min value is: ", *minValue)
-		fmt.Println("max value is: ", *maxValue)
-	} else {
-		fmt.Println("No parameters specified- see usage\n")
-		flag.Usage()
-	}
-
-	run_program_with_settings(&program_settings)*/
-
 }
