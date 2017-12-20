@@ -17,7 +17,7 @@ func run_numeric(influxHost string, influxDatabase string, topic string, min_val
 	count := 0
 	for currentTime.Before(untilTime) {
 		currentTime = currentTime.Add(duration)
-		log_data_to_influx(currentTime, "test topic", strconv.Itoa(get_random_value(min_value, max_value)))
+		log_data_to_influx(currentTime, topic, strconv.Itoa(get_random_value(min_value, max_value)))
 		count++
 	}
 	fmt.Println("total logged data: ", count)
