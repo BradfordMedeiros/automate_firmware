@@ -1,0 +1,19 @@
+
+to add wifi point go to 
+
+/etc/wpa_supplicant/wpa_supplicant.conf
+
+and at the end add 
+network = {
+
+   ssid="SSID NAME IN HERE"
+   psk="password for that in here"
+
+  #can generate this part from wpa_passphase ssidofnetwork passwordofnewtork
+
+
+
+
+}
+
+then reconfigure with wpa_cli -i wlan0 reconfigure
