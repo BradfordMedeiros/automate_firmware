@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=My theme
+Description=Raspberry Pi theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/mytheme
+ScriptFile=/usr/share/plymouth/themes/mytheme/mytheme.script
