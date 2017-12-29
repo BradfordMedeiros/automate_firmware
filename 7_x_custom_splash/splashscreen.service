@@ -4,7 +4,7 @@ DefaultDependencies=no
 After=local-fs.target
 
 [Service]
-ExecStart=/usr/bin/fbi --noverbose -a /opt/splash.png
+ExecStart=/usr/bin/fbi -t 3 -1 --noverbose -a /opt/splash.png
 StandardInput=tty
 StandardOutput=tty
 
