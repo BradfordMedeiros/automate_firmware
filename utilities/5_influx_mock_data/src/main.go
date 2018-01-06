@@ -76,7 +76,7 @@ func main() {
 
 	fromTime := time.Date(
 		settings.fromYear, // year
-		time.Month(12),    // month
+		time.Month(settings.fromMonth),    // month
 		settings.fromDay,  // day
 		12,                // hour
 		0,                 // min
@@ -86,7 +86,7 @@ func main() {
 	)
 	untilTime := time.Date(
 		settings.untilYear, // year
-		time.Month(12),     // month
+		time.Month(settings.untilMonth),     // month
 		settings.untilDay,  // day
 		12,                 // hour
 		0,                  // min
