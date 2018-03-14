@@ -1,9 +1,14 @@
 
 #!/bin/bash
 
+function sedeasy {
+  sed -i "s/$(echo $1 | sed -e 's/\([[\/.*]\|\]\)/\\&/g')/$(echo $2 | sed -e 's/[\/&]/\\&/g')/g" $3
+}
+
 AUTOMATE_KEY=$1             # path where they automate hash be
 USB_FILE_DIRECTORY=$2       # usb file directory to execute scripts from, we assume the key is automate.key on the root (maybe way to use udev to do this instead?)
 EXECUTABLE_PATH=$3          # path where the usb_secure_autoexec executable will be put
+
 
 if [ $# != 3 ]
   then
@@ -21,8 +26,8 @@ cargo build --release
 cp target/release/usb_secure_autoexec ./build
 cp ./run_scripts.sh ./build
 
-sed -i "s/<SCRIPT_PATH>/$USB_FILE_DIRECTORY/g" ./build/run_scripts.sh
-sed -i "s/<SYS_PATH>/$AUTOMATE_KEY/g" ./build/run_scripts.sh
+sedeasy "<SCRIPT_PATH>" "$USB_FILE_DIRECTORY" ./build/run_scripts.sh
+sedeasy "<SYS_PATH>" "$AUTOMATE_KEY" ./build/run_scripts.sh
 
 cp ./udev/10-autorun.rules ./build
-sed -i "s/<EXECUTABLE>/$EXECUTABLE_PATH/g" ./build/10-autorun.rules
+sedeasy "<EXECUTABLE>" "$EXECUTABLE_PATH" ./build/10-autorun.rules
