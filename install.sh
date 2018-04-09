@@ -12,7 +12,7 @@
 # Install docker onto this machine.  Is there a better way of doing this?
 if [ -z "$(which docker)" ]; then
     echo "docker is not yet installed"
-    #curl -sSL https://get.docker.com | sh
+    curl -sSL https://get.docker.com | sh
 fi 
 
 ### Configuring software into right places section ###
