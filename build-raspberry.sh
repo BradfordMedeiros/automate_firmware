@@ -1,2 +1,0 @@
-
-echo "placeholder build raspberry"
