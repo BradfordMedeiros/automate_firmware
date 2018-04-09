@@ -8,27 +8,19 @@ LOGFILE="/var/log/${NAME}.log"
 AUTOMATE_PATH="/opt/automated/"
 
 START_OPTS="--start -d /opt/automated --exec ${AUTOMATE_PATH}/start.sh"
-STOP_OPTS="--stop -d /opt/automated --exec ${AUTOMATE_PATH}/stop.sh"
 
 case "$1" in
         start)
-	    touch /opt/automated/starting_main
             echo -n "Starting ${DESC}: "
             start-stop-daemon $START_OPTS >> $LOGFILE
             echo "$NAME."
         ;;
         stop)
-	    touch /opt/automated/stopping_main
-            echo -n "Stopping $DESC: "
-            start-stop-daemon $STOP_OPTS
+	    ${AUTOMATE_PATH}/stop.sh
             echo "$NAME."
         ;;
         restart|force-reload)
-            touch /opt/automated/restarting_main
             echo -n "Restarting $DESC: "
-            #start-stop-daemon $STOP_OPTS
-            #sleep 1
-            #start-stop-daemon $START_OPTS >> $LOGFILE
             echo "$NAME."
        ;;
         *)
