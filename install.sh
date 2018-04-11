@@ -22,5 +22,14 @@ echo "pi:password" | sudo chpasswd  # hardcoding password to password (as oppose
 
 sudo useradd automate
 echo "automate:password" | sudo chpasswd
-mkdir /home/automate
+mkdir -p /home/automate
 
+(
+   cd 0_x_install_automate
+   ./install.sh
+)
+
+(
+   cd 1_x_additional_packages
+   ./install.sh
+)
