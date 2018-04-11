@@ -33,3 +33,8 @@ mkdir -p /home/automate
    cd 1_x_additional_packages
    ./install.sh
 )
+
+(
+   cd 4_0_led_control
+   ./install.sh
+)
