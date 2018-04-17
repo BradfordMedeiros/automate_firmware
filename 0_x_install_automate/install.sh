@@ -8,6 +8,9 @@ sudo cp stop.sh /opt/automated
 sudo cp status.sh /opt/automated
 sudo cp use_image.sh /opt/automated
 
+sudo cp read_pipe.sh /opt/automated
+sudo cp write_pipe.sh /opt/automated
+
 (
    cd /opt/automated/
    echo "bradfordmedeiros/core_arm_1.0.0" > /opt/automated/container.config

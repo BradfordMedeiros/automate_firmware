@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pipe=/tmp/testpipe
+pipe=/opt/automated/testpipe
 
 trap "rm -f $pipe" EXIT
 
@@ -14,7 +14,8 @@ do
         if [[ "$line" == 'quit' ]]; then
             break
         fi
-        echo $line
+        echo "line is: $line"
+	eval $line
     fi
 done
 
