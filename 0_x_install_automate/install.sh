@@ -6,9 +6,11 @@ echo "copying files and scripts"
 sudo mkdir -p /opt/automated/
 sudo cp start.sh /opt/automated
 sudo cp start-controller.sh /opt/automated
+sudo cp stop-controller.sh /opt/automated
 sudo cp stop.sh /opt/automated
 sudo cp status.sh /opt/automated
 sudo cp use_image.sh /opt/automated
+sudo cp use_controller.sh /opt/automated
 
 sudo cp read_pipe.sh /opt/automated
 sudo cp write_pipe.sh /opt/automated
@@ -19,6 +21,7 @@ sudo mkfifo /opt/automated/pipe  # main docker controller writes to this pipe, s
 (
    cd /opt/automated/
    echo "bradfordmedeiros/core_arm_1.0.0" > /opt/automated/container.config
+   echo "core_default" > /opt/automated/controller-container.config
 )
 
 echo "installing automated_controller service"
@@ -30,9 +33,9 @@ sudo service automated-controller start
 echo "finished installing automated_controller service"
 
 echo "installing automated service"
-#sudo cp automated /etc/init.d
-#sudo systemctl daemon-reload 
-#sudo service automated start
+sudo cp automated /etc/init.d
+sudo systemctl daemon-reload 
+sudo service automated start
 echo "finished installing automated service"
 
 echo "finished installing automate core docker image"
