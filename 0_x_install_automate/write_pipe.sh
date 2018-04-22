@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pipe=/opt/automated/testpipe
+pipe=/opt/automated/pipe
 
 if [[ ! -p $pipe ]]; then
     echo "Reader not running"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-pipe=/opt/automated/testpipe
+touch /somefile
+pipe=/opt/automated/pipe
 
 trap "rm -f $pipe" EXIT
 

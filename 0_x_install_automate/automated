@@ -7,7 +7,7 @@ LOGFILE="/var/log/${NAME}.log"
 
 AUTOMATE_PATH="/opt/automated/"
 
-START_OPTS="--start -d /opt/automated --exec ${AUTOMATE_PATH}/start.sh"
+START_OPTS="--start -d /opt/automated --exec ${AUTOMATE_PATH}start.sh"
 
 case "$1" in
         start)
@@ -16,7 +16,7 @@ case "$1" in
             echo "$NAME."
         ;;
         stop)
-	    ${AUTOMATE_PATH}/stop.sh
+	    ${AUTOMATE_PATH}stop.sh
             echo "$NAME."
         ;;
         restart|force-reload)

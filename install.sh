@@ -24,17 +24,23 @@ sudo useradd automate
 echo "automate:password" | sudo chpasswd
 mkdir -p /home/automate
 
+echo "Installing automate"
 (
    cd 0_x_install_automate
    ./install.sh
 )
+echo "finished installing automate"
 
+echo "Installing additional packages"
 (
    cd 1_x_additional_packages
    ./install.sh
 )
+echo "finished installing additional packages"
 
+echo "Installing led control"
 (
    cd 4_0_led_control
    ./install.sh
 )
+echo "finished installing led control"
