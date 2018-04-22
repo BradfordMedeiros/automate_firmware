@@ -3,7 +3,7 @@ Description=Automate Controller Service
 After=multi-user.target
 
 [Service]
-Type=idle
+Type=forking
 ExecStart=/opt/automated/start-controller.sh
 
 [Install]

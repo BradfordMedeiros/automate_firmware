@@ -16,7 +16,6 @@ sudo cp read_pipe.sh /opt/automated
 sudo cp write_pipe.sh /opt/automated
 
 echo "creating named pipe in /opt/automated/pipe"
-sudo mkfifo /opt/automated/pipe  # main docker controller writes to this pipe, script started in service container reads constantly from pipe and executes it
 
 (
    cd /opt/automated/

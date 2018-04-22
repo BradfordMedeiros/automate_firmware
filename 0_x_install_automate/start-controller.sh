@@ -1,6 +1,7 @@
 #! /bin/bash
 
 
+touch /cat
 
 cd /opt/automated/
 ./read_pipe.sh &
